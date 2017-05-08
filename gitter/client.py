@@ -1,7 +1,7 @@
 import requests as r
 
 from gitter.const import GITTER_BASE_URL
-from gitter.errors import GitterTokenError
+from gitter.errors import GitterTokenError, GitterApiError
 
 
 class BaseApi:
@@ -70,16 +70,18 @@ class Rooms(BaseApi):
     def grab_room(self, uri_name):
         return self.post('rooms', data={'uri': uri_name})
 
-    def join(self, room_id):
-        user_id = self.get_user_id()
+    def join(self, room_name):
+        user_id = self.get_user_id
         api_meth = 'user/{}/rooms'.format(user_id)
-        return self.post(api_meth, data={'id': room_id})
+        return self.post(
+            api_meth,
+            data={'id': self.find_by_room_name(room_name)}
+        )
 
-    def leave(self, room_id, _user_id=None):
-        user_id = self.get_user_id()
-
+    def leave(self, room_name, _user_id=None):
+        user_id = self.get_user_id
         api_meth = 'rooms/{}/users/{}'.format(
-            room_id,
+            self.find_by_room_name(room_name),
             user_id if user_id else _user_id
         )
 
@@ -121,6 +123,40 @@ class User(BaseApi):
         api_meth = 'user/{}/rooms'.format(self.get_user_id)
         return self.get(api_meth)
 
+    def unread_items(self, room_name):
+        api_met = 'user/{}/rooms/{}/unreadItems'.format(
+            self.get_user_id,
+            self.find_by_room_name(room_name)
+        )
+        return self.get(api_met)
+
+    @property
+    def orgs(self):
+        api_meth = 'user/{}/orgs'.format(self.get_user_id)
+        return self.get(api_meth)
+
+    @property
+    def repos(self):
+        api_meth = 'user/{}/repos'.format(self.get_user_id)
+        return self.get(api_meth)
+
+    @property
+    def channels(self):
+        api_meth = 'user/{}/channels'.format(self.get_user_id)
+        return self.get(api_meth)
+
+    # Method will be refactor
+    # def mark_as_read(self, room_name, chat):
+    #     if chat and isinstance(chat, list):
+    #         chat = [self.find_by_room_name(name) for name in chat]
+    #     else:
+    #         raise GitterApiError('Chat argument must be a list.')
+    #     api_meth = 'user/{}/rooms/{}/unreadItems'.format(
+    #         self.get_user_id,
+    #         self.find_by_room_name(room_name),
+    #     )
+    #     return self.post(api_meth, data={'chat': chat})
+
 
 class GitterClient(BaseApi):
     def __init__(self, token=None):
@@ -130,3 +166,6 @@ class GitterClient(BaseApi):
         self.rooms = Rooms(token)
         self.message = Messages(token)
         self.user = User(token)
+
+gitter = GitterClient('29ee4e6f41fb6835196996dbd682c5e47e503bb7')
+print(gitter.user.channels)
