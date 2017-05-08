@@ -1,7 +1,7 @@
 import requests as r
 
 from gitter.const import GITTER_BASE_URL
-from gitter.errors import GitterTokenError, GitterApiError
+from gitter.errors import GitterTokenError
 
 
 class BaseApi:
@@ -166,6 +166,3 @@ class GitterClient(BaseApi):
         self.rooms = Rooms(token)
         self.message = Messages(token)
         self.user = User(token)
-
-gitter = GitterClient('29ee4e6f41fb6835196996dbd682c5e47e503bb7')
-print(gitter.user.channels)
