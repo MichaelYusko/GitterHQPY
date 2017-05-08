@@ -8,3 +8,7 @@ class GitterMessageErorr(Exception):
 
     def __str__(self):
         return 'You don\'t have messages in {} room'.format(self.room_name)
+
+
+class GitterApiError(Exception):
+    pass
